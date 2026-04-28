@@ -7,7 +7,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Lock } from 'lucide-react';
+import { AuthShell } from '@/components/shell/AuthShell';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -53,49 +54,69 @@ export default function ResetPasswordPage({
   }
 
   return (
-    <main className="flex flex-1 items-center justify-center px-6 py-16">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl">Set a new password</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="password">New password</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                {...register('password')}
-              />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="confirm">Confirm</Label>
-              <Input
-                id="confirm"
-                type="password"
-                autoComplete="new-password"
-                {...register('confirm')}
-              />
-              {errors.confirm && (
-                <p className="text-sm text-destructive">{errors.confirm.message}</p>
-              )}
-            </div>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? 'Saving…' : 'Update password'}
-            </Button>
-            <Link
-              href="/login"
-              className="text-center text-sm text-muted-foreground hover:underline"
-            >
-              Back to sign in
-            </Link>
-          </form>
-        </CardContent>
-      </Card>
-    </main>
+    <AuthShell
+      eyebrow="New password"
+      title="Set a new password"
+      description="Choose a passphrase you don't use anywhere else. At least 8 characters."
+      footer={
+        <Link href="/login" className="hover:text-accent">
+          ← Back to sign in
+        </Link>
+      }
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
+        <div className="grid gap-1.5">
+          <Label
+            htmlFor="password"
+            className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground"
+          >
+            New password
+          </Label>
+          <div className="relative">
+            <Lock className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="password"
+              type="password"
+              autoComplete="new-password"
+              {...register('password')}
+              className="h-11 pl-9"
+            />
+          </div>
+          {errors.password && (
+            <p className="text-xs text-destructive">{errors.password.message}</p>
+          )}
+        </div>
+
+        <div className="grid gap-1.5">
+          <Label
+            htmlFor="confirm"
+            className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground"
+          >
+            Confirm
+          </Label>
+          <div className="relative">
+            <Lock className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="confirm"
+              type="password"
+              autoComplete="new-password"
+              {...register('confirm')}
+              className="h-11 pl-9"
+            />
+          </div>
+          {errors.confirm && (
+            <p className="text-xs text-destructive">{errors.confirm.message}</p>
+          )}
+        </div>
+
+        <Button
+          type="submit"
+          disabled={submitting}
+          className="h-11 bg-accent text-accent-foreground hover:bg-accent-deep"
+        >
+          {submitting ? 'Saving…' : 'Update password'}
+        </Button>
+      </form>
+    </AuthShell>
   );
 }

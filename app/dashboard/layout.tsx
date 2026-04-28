@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth, getRefreshToken } from '@/stores/auth';
 import { bootSession } from '@/lib/auth-api';
 import { Sidebar } from '@/components/shell/Sidebar';
+import { Topbar } from '@/components/shell/Topbar';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -20,7 +21,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         setChecked(true);
         return;
       }
-      // No access token in memory — try to restore via refresh token
       const refresh = getRefreshToken();
       if (!refresh) {
         router.replace('/login');
@@ -43,7 +43,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
       <main className="flex flex-1 items-center justify-center p-8">
         <div className="w-full max-w-sm space-y-3">
-          <Skeleton className="h-8 w-2/3" />
+          <Skeleton className="h-7 w-2/3" />
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-5/6" />
         </div>
@@ -54,11 +54,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex flex-1 flex-col md:flex-row">
       <Sidebar />
-      <div className="flex flex-1 flex-col">
-        <header className="hidden h-16 items-center justify-between border-b border-border px-6 md:flex">
-          <h1 className="text-base font-semibold tracking-tight">Dashboard</h1>
-        </header>
-        <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <Topbar />
+        <main className="flex-1 overflow-auto px-4 py-6 md:px-8 md:py-10">
+          <div className="mx-auto w-full max-w-7xl">{children}</div>
+        </main>
       </div>
     </div>
   );

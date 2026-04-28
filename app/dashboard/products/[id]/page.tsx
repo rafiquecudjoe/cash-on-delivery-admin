@@ -19,24 +19,36 @@ export default function EditProductPage({
   });
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold tracking-tight">
+    <div className="space-y-10">
+      <header className="reveal flex flex-col gap-2">
+        <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+          Editing
+        </p>
+        <h1 className="font-display text-4xl font-semibold tracking-tight md:text-[44px]">
           {data?.name ?? 'Edit product'}
-        </h2>
-        <p className="text-muted-foreground text-sm">Update details and save.</p>
-      </div>
+        </h1>
+        <p className="max-w-xl text-sm text-muted-foreground">
+          Update details and save. Changes go live immediately.
+        </p>
+      </header>
 
       {isLoading && (
-        <div className="space-y-2">
-          <Skeleton className="h-10 w-1/2" />
-          <Skeleton className="h-32 w-full" />
+        <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+          <div className="space-y-4">
+            <Skeleton className="h-72 w-full rounded-xl" />
+            <Skeleton className="h-40 w-full rounded-xl" />
+          </div>
+          <Skeleton className="h-96 w-full rounded-xl" />
         </div>
       )}
       {error && (
         <p className="text-sm text-destructive">{parseApiError(error)}</p>
       )}
-      {data && <ProductForm product={data} />}
+      {data && (
+        <div className="reveal" style={{ animationDelay: '60ms' }}>
+          <ProductForm product={data} />
+        </div>
+      )}
     </div>
   );
 }

@@ -4,12 +4,23 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================================
+   Cash on Delivery — Admin design tokens
+   "Editorial Operator": warm editorial palette + functional density.
+   Inspired by Anthropic (warmth), Linear (precision), Plain (restraint).
+   ============================================================ */
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --color-surface: var(--surface);
+  --color-surface-subtle: var(--surface-subtle);
+
+  --font-sans: var(--font-sora);
+  --font-display: var(--font-fraunces);
+  --font-mono: var(--font-mono-jb);
+  --font-heading: var(--font-fraunces);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -18,14 +29,17 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
+
   --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
@@ -39,92 +53,252 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-accent-deep: var(--accent-deep);
+  --color-accent-soft: var(--accent-soft);
+  --color-border-strong: var(--border-strong);
+
   --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
+  --radius-md: calc(var(--radius) * 0.85);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Shadow ramp uses ink (#1c1a17) tints, identical to V1's --shadow-* */
+  --shadow-card: 0 1px 2px rgba(28, 26, 23, 0.06);
+  --shadow-lift: 0 8px 24px -8px rgba(28, 26, 23, 0.18);
+  --shadow-pop:  0 30px 60px -30px rgba(28, 26, 23, 0.35);
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  /* canvas — matches V1 landing exactly so admin and public site
+     read as the same brand. See v1/styles.css :root. */
+  --background:        #f5efe6;  /* --bg */
+  --foreground:        #1c1a17;  /* --ink */
+  --surface:           #fffaf2;  /* --surface */
+  --surface-subtle:    #efe6d6;  /* --bg-deep */
+
+  /* surfaces */
+  --card:              #fffaf2;
+  --card-foreground:   #1c1a17;
+  --popover:           #fffaf2;
+  --popover-foreground:#1c1a17;
+
+  /* primary action — warm ink */
+  --primary:           #1c1a17;
+  --primary-foreground:#f5efe6;
+
+  /* secondary surface — deeper cream chip */
+  --secondary:         #efe6d6;
+  --secondary-foreground:#1c1a17;
+
+  /* muted */
+  --muted:             #efe6d6;
+  --muted-foreground:  #5a534b;  /* --ink-soft */
+
+  /* accent — V1 deep terracotta. Used sparingly. */
+  --accent:            #ab401c;  /* --accent */
+  --accent-foreground: #fffaf2;
+  --accent-deep:       #8a3416;
+  --accent-soft:       #e8b89a;
+
+  /* destructive — same warm terracotta family, slightly desaturated */
+  --destructive:       #a4452b;
+
+  /* status — V1 semantic colors */
+  --success:           #1f3a2e;  /* --forest */
+  --success-foreground:#eef2ec;
+  --success-soft:      #38614e;  /* --forest-soft */
+  --warning:           #c89b3c;  /* --gold */
+  --warning-foreground:#2a200d;
+  --info:              #38614e;  /* uses forest-soft to stay on-palette */
+  --info-foreground:   #ecf3ee;
+
+  /* hairlines */
+  --border:            #e2d8c6;  /* --line */
+  --border-subtle:     #ebe1cf;  /* between bg-deep and line */
+  --border-strong:     #c8baa1;  /* --line-strong */
+  --input:             #e2d8c6;
+  --ring:              #ab401c;
+
+  /* charts — warm earthy ramp */
+  --chart-1:           #ab401c;
+  --chart-2:           #1f3a2e;
+  --chart-3:           #c89b3c;
+  --chart-4:           #38614e;
+  --chart-5:           #5a534b;
+
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* sidebar — deeper cream than canvas (one step darker on the warm ramp) */
+  --sidebar:                       #efe6d6;
+  --sidebar-foreground:            #1c1a17;
+  --sidebar-primary:               #1c1a17;
+  --sidebar-primary-foreground:    #f5efe6;
+  --sidebar-accent:                #e7dcc6;
+  --sidebar-accent-foreground:     #1c1a17;
+  --sidebar-border:                #d9cdb5;
+  --sidebar-ring:                  #ab401c;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* warm dark — same warm terracotta lineage, never pitch black */
+  --background:        #1c1a17;
+  --foreground:        #f5efe6;
+  --surface:           #25221d;
+  --surface-subtle:    #2c2922;
+
+  --card:              #25221d;
+  --card-foreground:   #f5efe6;
+  --popover:           #25221d;
+  --popover-foreground:#f5efe6;
+
+  --primary:           #f5efe6;
+  --primary-foreground:#1c1a17;
+
+  --secondary:         #2c2922;
+  --secondary-foreground:#f5efe6;
+
+  --muted:             #2c2922;
+  --muted-foreground:  #a89e8e;
+
+  --accent:            #d96f3f;
+  --accent-foreground: #1c1a17;
+  --accent-deep:       #ab401c;
+  --accent-soft:       #5a3322;
+
+  --destructive:       #c97058;
+
+  --success:           #5a8c70;
+  --success-foreground:#0f2017;
+  --success-soft:      #38614e;
+  --warning:           #d9b46a;
+  --warning-foreground:#2a200d;
+  --info:              #5a8c70;
+  --info-foreground:   #0f2017;
+
+  --border:            #3a342a;
+  --border-subtle:     #2c2922;
+  --border-strong:     #5c5347;
+  --input:             #3a342a;
+  --ring:              #d96f3f;
+
+  --chart-1:           #d96f3f;
+  --chart-2:           #5a8c70;
+  --chart-3:           #d9b46a;
+  --chart-4:           #38614e;
+  --chart-5:           #a89e8e;
+
+  --sidebar:                       #1f1d19;
+  --sidebar-foreground:            #f5efe6;
+  --sidebar-primary:               #f5efe6;
+  --sidebar-primary-foreground:    #1c1a17;
+  --sidebar-accent:                #2c2922;
+  --sidebar-accent-foreground:     #f5efe6;
+  --sidebar-border:                #3a342a;
+  --sidebar-ring:                  #d96f3f;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    font-family: var(--font-sora), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv11";
   }
-  html {
-    @apply font-sans;
+
+  /* Headings get the editorial serif. Tight tracking, slightly looser leading. */
+  h1, h2, h3, .font-display {
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-feature-settings: "ss01";
+    letter-spacing: -0.02em;
+  }
+
+  /* Code, IDs, monospace numerics */
+  code, kbd, pre, samp, .font-mono {
+    font-family: var(--font-mono-jb), ui-monospace, monospace;
+    font-feature-settings: "zero", "ss01";
+  }
+
+  /* Tabular numbers in tables and stats — lines align under each other */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ============================================================
+   Atmospheric details — grain overlay + noise
+   ============================================================ */
+@layer utilities {
+  /* Subtle paper-grain texture that adds warmth without distracting.
+     Only applied where atmosphere is wanted (not on tables / dense data). */
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.10  0 0 0 0 0.09  0 0 0 0 0.08  0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    mix-blend-mode: multiply;
+  }
+
+  /* Hairline divider — for table rows and sidebar separators */
+  .hairline {
+    background: var(--border-subtle);
+    height: 1px;
+    width: 100%;
+  }
+
+  /* Number highlight — large display numerics in the editorial face */
+  .num-display {
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-feature-settings: "ss01", "cv11", "tnum";
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+  }
+
+  /* ⌘K-style keyboard chip */
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 18px;
+    min-width: 18px;
+    padding: 0 5px;
+    font-family: var(--font-mono-jb), ui-monospace, monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    line-height: 1;
+  }
+
+  /* Fade-up reveal for staggered table/card mounts */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reveal {
+    animation: fade-up 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 }

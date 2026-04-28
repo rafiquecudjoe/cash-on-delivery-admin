@@ -5,6 +5,7 @@ export type Role = 'ADMIN' | 'MEMBER';
 export interface AuthUser {
   id: string;
   email: string;
+  username: string | null;
   name: string | null;
   role: Role;
 }

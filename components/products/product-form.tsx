@@ -6,7 +6,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,9 @@ import {
   createProduct,
   updateProduct,
 } from '@/lib/products-api';
+import { useAuth } from '@/stores/auth';
 import { parseApiError, parseCediInput } from '@/lib/format';
+import { cn } from '@/lib/utils';
 
 const CATEGORIES = ['electronics', 'fashion', 'home', 'beauty', 'other'] as const;
 
@@ -50,6 +52,7 @@ interface Props {
 
 export function ProductForm({ product }: Props) {
   const router = useRouter();
+  const isAdmin = useAuth((s) => s.user?.role === 'ADMIN');
   const [submitting, setSubmitting] = useState(false);
 
   const initial: FormValues = {
@@ -69,7 +72,7 @@ export function ProductForm({ product }: Props) {
     register,
     handleSubmit,
     control,
-    formState: { errors },
+    formState: { errors, isDirty },
     watch,
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -77,6 +80,7 @@ export function ProductForm({ product }: Props) {
   });
 
   const images = watch('images');
+  const active = watch('active');
 
   async function onSubmit(values: FormValues) {
     setSubmitting(true);
@@ -111,104 +115,233 @@ export function ProductForm({ product }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6 lg:grid-cols-[1fr_320px]">
-      <Card>
-        <CardHeader>
-          <CardTitle>Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="grid gap-8 lg:grid-cols-[1fr_360px]"
+    >
+      {/* ============== LEFT: details + pricing + internal ============== */}
+      <div className="space-y-8">
+        <Section
+          eyebrow="01"
+          title="Identity"
+          description="What customers see at a glance."
+        >
           <Field label="Name" error={errors.name?.message}>
-            <Input {...register('name')} placeholder="Wireless Earbuds Pro" />
+            <Input
+              {...register('name')}
+              placeholder="Wireless Earbuds Pro"
+              className="h-10"
+            />
           </Field>
-          <Field label="Description" error={errors.description?.message}>
+
+          <Field
+            label="Description"
+            error={errors.description?.message}
+            hint="Up to 1000 characters"
+          >
             <textarea
               rows={4}
               {...register('description')}
-              className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              placeholder="What's it for, what's special…"
+              className="w-full rounded-md border border-input bg-card px-3 py-2.5 text-sm leading-relaxed shadow-xs outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/20"
+              placeholder="What it does, what makes it special, how it ships."
             />
           </Field>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Price (₵)" error={errors.priceCedi?.message}>
-              <Input {...register('priceCedi')} placeholder="199.99" inputMode="decimal" />
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Category" error={errors.category?.message}>
+              <Controller
+                control={control}
+                name="category"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="h-10 w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CATEGORIES.map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {c.charAt(0).toUpperCase() + c.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </Field>
-            <Field label="Was price (₵)" hint="optional">
-              <Input {...register('wasPriceCedi')} placeholder="249.99" inputMode="decimal" />
+            <Field label="Badge" hint="e.g. Bestseller, New">
+              <Input
+                {...register('badge')}
+                placeholder="Optional"
+                className="h-10"
+              />
             </Field>
           </div>
-          <Field label="Category" error={errors.category?.message}>
-            <Controller
-              control={control}
-              name="category"
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES.map((c) => (
-                      <SelectItem key={c} value={c}>
-                        {c.charAt(0).toUpperCase() + c.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </Field>
-          <Field label="Badge" hint="e.g. Bestseller, New (optional)">
-            <Input {...register('badge')} placeholder="" />
-          </Field>
-        </CardContent>
-      </Card>
+        </Section>
 
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Images</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Controller
-              control={control}
-              name="images"
-              render={({ field }) => (
-                <ImageUploader value={field.value} onChange={field.onChange} />
-              )}
-            />
-            {errors.images && (
-              <p className="mt-2 text-sm text-destructive">{errors.images.message}</p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Internal</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Field label="Cost price (₵)" hint="hidden from public">
-              <Input {...register('costPriceCedi')} placeholder="120.00" inputMode="decimal" />
+        <Section
+          eyebrow="02"
+          title="Pricing"
+          description="Public prices in cedis. Strike-through field is optional."
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Price (₵)" error={errors.priceCedi?.message}>
+              <Input
+                {...register('priceCedi')}
+                placeholder="199.99"
+                inputMode="decimal"
+                className="h-10 font-mono"
+              />
             </Field>
-            <Field label="Supplier" hint="hidden from public">
-              <Input {...register('supplier')} placeholder="ACME Imports" />
+            <Field label="Was price (₵)" hint="optional">
+              <Input
+                {...register('wasPriceCedi')}
+                placeholder="249.99"
+                inputMode="decimal"
+                className="h-10 font-mono"
+              />
             </Field>
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" {...register('active')} className="size-4" />
-              Active (visible on public site)
-            </label>
-          </CardContent>
-        </Card>
+          </div>
+        </Section>
 
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={() => router.back()}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={submitting || images.length === 0}>
-            {submitting ? 'Saving…' : product ? 'Save changes' : 'Create product'}
-          </Button>
-        </div>
+        {/* Internal — only admins see real values; non-admins get nothing */}
+        {isAdmin && (
+          <Section
+            eyebrow="03"
+            title={
+              <span className="inline-flex items-center gap-2">
+                Internal <Lock className="size-3.5 text-muted-foreground" />
+              </span>
+            }
+            description="Admin-only. Used for margin tracking. Never shown publicly."
+            tone="muted"
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Cost (₵)">
+                <Input
+                  {...register('costPriceCedi')}
+                  placeholder="120.00"
+                  inputMode="decimal"
+                  className="h-10 font-mono"
+                />
+              </Field>
+              <Field label="Supplier">
+                <Input
+                  {...register('supplier')}
+                  placeholder="Supplier name"
+                  className="h-10"
+                />
+              </Field>
+            </div>
+          </Section>
+        )}
       </div>
+
+      {/* ============== RIGHT: images + publish ============== */}
+      <aside className="space-y-6 lg:sticky lg:top-20 lg:self-start">
+        <Section
+          eyebrow="04"
+          title="Images"
+          description="First image is the cover. Drag to reorder is coming soon."
+        >
+          <Controller
+            control={control}
+            name="images"
+            render={({ field }) => (
+              <ImageUploader value={field.value} onChange={field.onChange} />
+            )}
+          />
+          {errors.images && (
+            <p className="mt-2 text-sm text-destructive">{errors.images.message}</p>
+          )}
+        </Section>
+
+        <Section eyebrow="05" title="Publish">
+          <label className="flex cursor-pointer items-start gap-3 rounded-md border border-border bg-card p-3 transition-colors hover:border-foreground/30">
+            <input
+              type="checkbox"
+              {...register('active')}
+              className="mt-0.5 size-4 accent-[--color-accent]"
+            />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground">
+                {active ? 'Visible on the public site' : 'Hidden draft'}
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {active
+                  ? 'Customers can buy it now.'
+                  : 'Save as draft — toggle on later.'}
+              </p>
+            </div>
+          </label>
+
+          <div className="mt-4 flex items-center justify-between gap-2 border-t border-border-subtle pt-4">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => router.back()}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={submitting || images.length === 0 || (product && !isDirty)}
+              className={cn('px-4', !product && 'bg-accent hover:bg-accent-deep text-accent-foreground')}
+            >
+              {submitting
+                ? 'Saving…'
+                : product
+                  ? 'Save changes'
+                  : 'Create product'}
+            </Button>
+          </div>
+        </Section>
+      </aside>
     </form>
+  );
+}
+
+/* ============================================================
+   Section — numbered editorial section header + rule line.
+   Visual rhythm comes from these consistent eyebrow + title blocks.
+   ============================================================ */
+function Section({
+  eyebrow,
+  title,
+  description,
+  tone = 'default',
+  children,
+}: {
+  eyebrow?: string;
+  title: React.ReactNode;
+  description?: string;
+  tone?: 'default' | 'muted';
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      className={cn(
+        'rounded-xl border bg-card p-6 transition-colors',
+        tone === 'muted' ? 'border-border-subtle bg-secondary/30' : 'border-border',
+      )}
+    >
+      <header className="mb-5 flex items-baseline gap-3">
+        {eyebrow && (
+          <span className="font-mono text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            {eyebrow}
+          </span>
+        )}
+        <div className="flex-1">
+          <h3 className="font-display text-lg font-semibold tracking-tight">
+            {title}
+          </h3>
+          {description && (
+            <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+          )}
+        </div>
+      </header>
+      <div className="space-y-4">{children}</div>
+    </section>
   );
 }
 
@@ -224,13 +357,15 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid gap-2">
+    <div className="grid gap-1.5">
       <div className="flex items-baseline justify-between">
-        <Label>{label}</Label>
-        {hint && <span className="text-xs text-muted-foreground">{hint}</span>}
+        <Label className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          {label}
+        </Label>
+        {hint && <span className="text-xs text-muted-foreground/80">{hint}</span>}
       </div>
       {children}
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }

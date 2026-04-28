@@ -7,8 +7,14 @@ interface LoginResponse {
   user: AuthUser;
 }
 
-export async function login(email: string, password: string): Promise<LoginResponse> {
-  const { data } = await api.post<LoginResponse>('/auth/login', { email, password });
+export async function login(
+  identifier: string,
+  password: string,
+): Promise<LoginResponse> {
+  const { data } = await api.post<LoginResponse>('/auth/login', {
+    identifier,
+    password,
+  });
   useAuth.getState().setSession(data);
   return data;
 }

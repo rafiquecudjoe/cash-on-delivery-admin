@@ -12,7 +12,11 @@ const scriptSrc = ["'self'", "'unsafe-inline'", isDev && "'unsafe-eval'"]
   .join(' ');
 
 const imgSrc = ["'self'", 'data:', 'blob:', 'https:', minioOrigin].filter(Boolean).join(' ');
-const connectSrc = ["'self'", apiOrigin, isDev && 'ws:'].filter(Boolean).join(' ');
+// MinIO origin is allow-listed: browser uploads PUT directly to presigned
+// URLs at the MinIO host, which is a different origin from the API.
+const connectSrc = ["'self'", apiOrigin, minioOrigin, isDev && 'ws:']
+  .filter(Boolean)
+  .join(' ');
 
 const csp = [
   "default-src 'self'",
