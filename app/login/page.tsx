@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { ArrowRight, AtSign, Lock } from 'lucide-react';
+import { ArrowRight, AtSign, Eye, EyeOff, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,7 @@ export default function LoginPage() {
   const router = useRouter();
   const accessToken = useAuth((s) => s.accessToken);
   const [submitting, setSubmitting] = useState(false);
+  const [showPw, setShowPw] = useState(false);
 
   const {
     register,
@@ -188,11 +189,20 @@ export default function LoginPage() {
                 <Lock className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="password"
-                  type="password"
+                  type={showPw ? 'text' : 'password'}
                   autoComplete="current-password"
                   {...register('password')}
-                  className="h-11 pl-9"
+                  className="h-11 pl-9 pr-10"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPw((v) => !v)}
+                  aria-label={showPw ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPw}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                >
+                  {showPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
               </div>
               {errors.password && (
                 <p className="text-xs text-destructive">{errors.password.message}</p>
