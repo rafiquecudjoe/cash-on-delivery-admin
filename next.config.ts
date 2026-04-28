@@ -7,14 +7,26 @@ const minioHost = hostOf(process.env.NEXT_PUBLIC_MINIO_URL);
 
 // Next.js App Router injects inline bootstrap scripts; without nonce middleware
 // 'unsafe-inline' for script-src stays. 'unsafe-eval' is only used by dev HMR.
-const scriptSrc = ["'self'", "'unsafe-inline'", isDev && "'unsafe-eval'"]
+// Cloudflare Web Analytics auto-injects beacon.min.js — allow that origin.
+const scriptSrc = [
+  "'self'",
+  "'unsafe-inline'",
+  'https://static.cloudflareinsights.com',
+  isDev && "'unsafe-eval'",
+]
   .filter(Boolean)
   .join(' ');
 
 const imgSrc = ["'self'", 'data:', 'blob:', 'https:', minioOrigin].filter(Boolean).join(' ');
-// MinIO origin is allow-listed: browser uploads PUT directly to presigned
-// URLs at the MinIO host, which is a different origin from the API.
-const connectSrc = ["'self'", apiOrigin, minioOrigin, isDev && 'ws:']
+// MinIO origin: browser uploads PUT directly to presigned URLs (different origin).
+// cloudflareinsights.com: beacon endpoint that the CF Insights script POSTs to.
+const connectSrc = [
+  "'self'",
+  apiOrigin,
+  minioOrigin,
+  'https://cloudflareinsights.com',
+  isDev && 'ws:',
+]
   .filter(Boolean)
   .join(' ');
 
