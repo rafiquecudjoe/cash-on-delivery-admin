@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ImageUploader } from './image-uploader';
+import { VideoUploader } from './video-uploader';
 import {
   AdminProduct,
   CreateProductPayload,
@@ -42,6 +43,7 @@ const schema = z.object({
   badge: z.string().max(40).optional(),
   active: z.boolean(),
   images: z.array(z.string().url()).min(1, 'At least 1 image'),
+  videoUrl: z.union([z.string().url(), z.literal('')]).optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -66,6 +68,7 @@ export function ProductForm({ product }: Props) {
     badge: product?.badge ?? '',
     active: product?.active ?? true,
     images: product?.images ?? [],
+    videoUrl: product?.videoUrl ?? '',
   };
 
   const {
@@ -97,11 +100,22 @@ export function ProductForm({ product }: Props) {
         active: values.active,
         images: values.images,
       };
+      const trimmedVideo = values.videoUrl?.trim();
       if (product) {
-        const payload: UpdateProductPayload = base;
+        // Send `videoUrl: null` to clear an existing video, omit when no
+        // change. Send the URL when set.
+        const payload: UpdateProductPayload = {
+          ...base,
+          ...(trimmedVideo
+            ? { videoUrl: trimmedVideo }
+            : product.videoUrl
+              ? { videoUrl: null }
+              : {}),
+        };
         await updateProduct(product.id, payload);
         toast.success('Product updated');
       } else {
+        if (trimmedVideo) base.videoUrl = trimmedVideo;
         await createProduct(base);
         toast.success('Product created');
       }
@@ -255,7 +269,24 @@ export function ProductForm({ product }: Props) {
           )}
         </Section>
 
-        <Section eyebrow="05" title="Publish">
+        <Section
+          eyebrow="05"
+          title="Video"
+          description="Optional. Shown first on the product page."
+        >
+          <Controller
+            control={control}
+            name="videoUrl"
+            render={({ field }) => (
+              <VideoUploader
+                value={field.value ?? ''}
+                onChange={field.onChange}
+              />
+            )}
+          />
+        </Section>
+
+        <Section eyebrow="06" title="Publish">
           <label className="flex cursor-pointer items-start gap-3 rounded-md border border-border bg-card p-3 transition-colors hover:border-foreground/30">
             <input
               type="checkbox"

@@ -42,6 +42,16 @@ export interface OrderItem {
   quantity: number;
 }
 
+export interface OrderReferrer {
+  source?: string;
+  medium?: string;
+  campaign?: string;
+  content?: string;
+  term?: string;
+  referrer?: string;
+  landingPath?: string;
+}
+
 export interface Order {
   id: string;
   customerName: string;
@@ -52,6 +62,7 @@ export interface Order {
   status: OrderStatus;
   total: number;
   notes: string | null;
+  referrer: OrderReferrer | null;
   createdAt: string;
   updatedAt: string;
   items?: OrderItem[];

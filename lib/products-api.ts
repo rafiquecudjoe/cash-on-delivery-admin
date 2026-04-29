@@ -4,6 +4,7 @@ export type ProductCategory = 'electronics' | 'fashion' | 'home' | 'beauty' | 'o
 
 export interface AdminProduct {
   id: string;
+  slug: string | null;
   name: string;
   description: string;
   price: number;
@@ -13,6 +14,7 @@ export interface AdminProduct {
   category: ProductCategory;
   badge: string | null;
   images: string[];
+  videoUrl: string | null;
   active: boolean;
   postedById: string;
   createdAt: string;
@@ -29,6 +31,7 @@ export interface CreateProductPayload {
   category: ProductCategory;
   badge?: string;
   images: string[];
+  videoUrl?: string | null;
   active?: boolean;
 }
 

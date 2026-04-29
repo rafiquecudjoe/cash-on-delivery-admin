@@ -22,6 +22,7 @@ import {
   STATUS_NEXT,
   updateOrderStatus,
   type OrderStatus,
+  type OrderReferrer,
 } from '@/lib/orders-api';
 import { formatCedi, parseApiError } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -309,6 +310,12 @@ export default function OrderDetailPage({
                   }
                 />
               )}
+              {data.referrer && hasAttribution(data.referrer) && (
+                <DetailRow
+                  label="Source"
+                  value={<ReferrerSummary r={data.referrer} />}
+                />
+              )}
             </div>
           </div>
 
@@ -400,6 +407,58 @@ function DetailRow({
       </p>
       <div className="min-w-0 flex-1">{value}</div>
       {action ? <div>{action}</div> : <div />}
+    </div>
+  );
+}
+
+/* ============================================================
+   Referrer rendering — captured from the public product page at
+   order time. Surfaces UTMs + raw HTTP referrer if either is present.
+   ============================================================ */
+function hasAttribution(r: OrderReferrer | null | undefined): boolean {
+  if (!r) return false;
+  return Boolean(
+    r.source || r.medium || r.campaign || r.content || r.term || r.referrer,
+  );
+}
+
+function ReferrerSummary({ r }: { r: OrderReferrer }) {
+  const chips: { label: string; value: string }[] = [];
+  if (r.source) chips.push({ label: 'source', value: r.source });
+  if (r.medium) chips.push({ label: 'medium', value: r.medium });
+  if (r.campaign) chips.push({ label: 'campaign', value: r.campaign });
+  if (r.content) chips.push({ label: 'content', value: r.content });
+  if (r.term) chips.push({ label: 'term', value: r.term });
+
+  return (
+    <div className="space-y-2">
+      {chips.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {chips.map((c) => (
+            <span
+              key={c.label}
+              className="inline-flex items-center gap-1 rounded-md border border-border bg-secondary/40 px-1.5 py-0.5 text-[11px]"
+            >
+              <span className="font-mono uppercase tracking-wider text-muted-foreground">
+                {c.label}
+              </span>
+              <span className="font-medium text-foreground">{c.value}</span>
+            </span>
+          ))}
+        </div>
+      )}
+      {r.referrer && (
+        <p className="break-all text-xs text-muted-foreground">
+          From{' '}
+          <span className="font-mono text-foreground/80">{r.referrer}</span>
+        </p>
+      )}
+      {r.landingPath && (
+        <p className="break-all text-[11px] text-muted-foreground/80">
+          Landed on{' '}
+          <span className="font-mono">{r.landingPath}</span>
+        </p>
+      )}
     </div>
   );
 }

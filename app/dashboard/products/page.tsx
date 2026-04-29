@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, Package } from 'lucide-react';
+import { Plus, Pencil, Trash2, Package, Link as LinkIcon, Check } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -183,6 +183,9 @@ export default function ProductsListPage() {
                     </span>
                   )}
                 </div>
+
+                {/* Public ad link — copy + open in new tab */}
+                {p.slug && <ShareLink slug={p.slug} />}
               </div>
 
               {/* footer actions */}
@@ -258,6 +261,62 @@ export default function ProductsListPage() {
     </div>
   );
 }
+
+/* ============================================================
+   ShareLink — public ad URL with copy-to-clipboard.
+   Admin pastes this into FB / IG / TikTok Ads Manager.
+   ============================================================ */
+function ShareLink({ slug }: { slug: string }) {
+  const [copied, setCopied] = useState(false);
+  const url = `${PUBLIC_SITE}/p/${slug}`;
+  const display = `${PUBLIC_HOST}/p/${slug}`;
+
+  function copy(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    void navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        setCopied(true);
+        toast.success('Link copied — paste into your ad');
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => toast.error('Could not copy'));
+  }
+
+  return (
+    <div
+      className="flex items-center gap-1 rounded-md border border-dashed border-border bg-background/60 py-1 pl-2.5 pr-1 text-[11px]"
+      title={url}
+    >
+      <LinkIcon className="size-3 shrink-0 text-muted-foreground" />
+      <span className="flex-1 truncate font-mono text-muted-foreground">
+        {display}
+      </span>
+      <button
+        type="button"
+        onClick={copy}
+        aria-label={copied ? 'Copied' : 'Copy link'}
+        className={cn(
+          'inline-flex size-6 shrink-0 items-center justify-center rounded transition-colors',
+          copied
+            ? 'text-success'
+            : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
+        )}
+      >
+        {copied ? (
+          <Check className="size-3" />
+        ) : (
+          <LinkIcon className="size-3" />
+        )}
+      </button>
+    </div>
+  );
+}
+
+const PUBLIC_SITE =
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://cashondeliverygh.com';
+const PUBLIC_HOST = PUBLIC_SITE.replace(/^https?:\/\//, '');
 
 function EmptyProducts() {
   return (
