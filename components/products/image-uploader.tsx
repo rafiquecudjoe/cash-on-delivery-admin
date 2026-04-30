@@ -8,7 +8,7 @@ import { getPresignedUpload, uploadFileToPresignedUrl } from '@/lib/products-api
 import { parseApiError } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
-const MAX_FILES = 5;
+const MAX_FILES = 10;
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'];
 
@@ -110,7 +110,7 @@ export function ImageUploader({ value, onChange }: Props) {
       />
       <p className="text-xs text-muted-foreground">
         <Upload className="mr-1 inline size-3" />
-        Max {MAX_FILES} images, up to 5MB each. JPG, PNG, WebP, AVIF, GIF.
+        Up to {MAX_FILES} images · 5MB each · JPG, PNG, WebP, AVIF, GIF.
       </p>
     </div>
   );

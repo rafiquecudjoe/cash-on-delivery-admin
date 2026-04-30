@@ -34,7 +34,7 @@ const CATEGORIES = ['electronics', 'fashion', 'home', 'beauty', 'other'] as cons
 
 const schema = z.object({
   name: z.string().min(2, 'Min 2 chars').max(120),
-  description: z.string().min(2).max(1000),
+  description: z.string().min(2).max(5000),
   priceCedi: z.string().regex(/^\d+(\.\d{1,2})?$/, 'e.g. 199.99'),
   wasPriceCedi: z.string().optional(),
   costPriceCedi: z.string().optional(),
@@ -151,7 +151,7 @@ export function ProductForm({ product }: Props) {
           <Field
             label="Description"
             error={errors.description?.message}
-            hint="Up to 1000 characters"
+            hint="Up to 5000 characters"
           >
             <textarea
               rows={4}
