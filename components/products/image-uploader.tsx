@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, type ChangeEvent } from 'react';
+import imageCompression from 'browser-image-compression';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -9,8 +10,46 @@ import { parseApiError } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 const MAX_FILES = 10;
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_SIZE = 5 * 1024 * 1024; // 5MB raw upload before compression
 const ALLOWED = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'];
+
+// Files smaller than this skip recompression — re-encoding small files
+// can actually make them bigger and adds latency.
+const SKIP_COMPRESS_BELOW = 200 * 1024; // 200KB
+
+// Long-edge cap. 1600px is plenty for the PDP square stage (~600px
+// rendered) and the 4× DPR retina case.
+const MAX_DIMENSION = 1600;
+const TARGET_QUALITY = 0.82;
+const TARGET_TYPE = 'image/webp';
+
+async function compressIfBig(file: File): Promise<File> {
+  // GIFs (animated) lose their animation when re-encoded as WebP single
+  // frames — pass through as-is. AVIF is already efficient, leave it.
+  if (file.type === 'image/gif' || file.type === 'image/avif') return file;
+  if (file.size < SKIP_COMPRESS_BELOW) return file;
+
+  try {
+    const compressed = await imageCompression(file, {
+      maxSizeMB: 0.5,
+      maxWidthOrHeight: MAX_DIMENSION,
+      fileType: TARGET_TYPE,
+      initialQuality: TARGET_QUALITY,
+      useWebWorker: true,
+    });
+    // The library returns a Blob with `name` set; ensure it's a real
+    // File and rename the extension so the upload key gets `.webp`.
+    const renamed = file.name.replace(/\.[^.]+$/, '') + '.webp';
+    return new File([compressed], renamed, {
+      type: TARGET_TYPE,
+      lastModified: Date.now(),
+    });
+  } catch {
+    // If compression fails for any reason, fall back to the original
+    // file rather than blocking the upload.
+    return file;
+  }
+}
 
 interface Props {
   value: string[];
@@ -41,7 +80,10 @@ export function ImageUploader({ value, onChange }: Props) {
     setUploading(true);
     const newUrls: string[] = [];
     try {
-      for (const file of files) {
+      for (const raw of files) {
+        // Compress before presign so the size we declare matches what
+        // we'll actually PUT.
+        const file = await compressIfBig(raw);
         const presigned = await getPresignedUpload(file);
         const publicUrl = await uploadFileToPresignedUrl(file, presigned);
         newUrls.push(publicUrl);
@@ -110,7 +152,8 @@ export function ImageUploader({ value, onChange }: Props) {
       />
       <p className="text-xs text-muted-foreground">
         <Upload className="mr-1 inline size-3" />
-        Up to {MAX_FILES} images · 5MB each · JPG, PNG, WebP, AVIF, GIF.
+        Up to {MAX_FILES} images · 5MB each · auto-compressed to WebP for
+        fast loading.
       </p>
     </div>
   );
