@@ -40,6 +40,7 @@ export interface OrderItem {
   productName: string;
   unitPrice: number;
   quantity: number;
+  tierLabel: string | null;
 }
 
 export interface OrderReferrer {

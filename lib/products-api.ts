@@ -2,6 +2,13 @@ import { api } from './api';
 
 export type ProductCategory = 'electronics' | 'fashion' | 'home' | 'beauty' | 'other';
 
+export interface PricingTier {
+  label: string;
+  price: number;
+}
+
+export type GalleryLayout = 'carousel' | 'stacked';
+
 export interface AdminProduct {
   id: string;
   slug: string | null;
@@ -15,6 +22,8 @@ export interface AdminProduct {
   badge: string | null;
   images: string[];
   videoUrl: string | null;
+  pricingTiers: PricingTier[] | null;
+  galleryLayout: GalleryLayout;
   active: boolean;
   postedById: string;
   createdAt: string;
@@ -32,6 +41,8 @@ export interface CreateProductPayload {
   badge?: string;
   images: string[];
   videoUrl?: string | null;
+  pricingTiers?: PricingTier[] | null;
+  galleryLayout?: GalleryLayout;
   active?: boolean;
 }
 

@@ -214,6 +214,11 @@ export default function OrderDetailPage({
                   <p className="truncate text-[15px] font-medium text-foreground">
                     {it.productName}
                   </p>
+                  {it.tierLabel && (
+                    <p className="mt-0.5 truncate text-xs font-medium uppercase tracking-[0.08em] text-accent">
+                      {it.tierLabel}
+                    </p>
+                  )}
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     <span className="num-display tabular-nums">
                       {formatCedi(it.unitPrice)}
