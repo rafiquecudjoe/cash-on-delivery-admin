@@ -56,7 +56,7 @@ const schema = z
     videoUrl: z.union([z.string().url(), z.literal('')]).optional(),
     hasTiers: z.boolean(),
     pricingTiers: z.array(tierSchema).max(6),
-    priceSubtext: z.string().max(200).optional(),
+    priceSubtext: z.string().max(1000).optional(),
     galleryLayout: z.enum(['carousel', 'stacked']),
   })
   .refine((v) => !v.hasTiers || v.pricingTiers.length >= 1, {
@@ -190,6 +190,23 @@ export function ProductForm({ product }: Props) {
           </Field>
 
           <Field
+            label="Subtitle"
+            hint="optional · shown between title and price · formatting supported"
+            error={errors.priceSubtext?.message}
+          >
+            <Controller
+              control={control}
+              name="priceSubtext"
+              render={({ field }) => (
+                <RichTextEditor
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+          </Field>
+
+          <Field
             label="Description"
             error={errors.description?.message}
             hint="Up to 5000 characters · formatting supported"
@@ -261,19 +278,6 @@ export function ProductForm({ product }: Props) {
             </Field>
           </div>
 
-          <Field
-            label="Subtitle"
-            hint="optional · shown between title and price · multi-line ok"
-            error={errors.priceSubtext?.message}
-          >
-            <textarea
-              rows={2}
-              {...register('priceSubtext')}
-              placeholder={'e.g.\n(PROMO) — In Red colour\nBUY 1 GET 1 FREE'}
-              maxLength={200}
-              className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm leading-relaxed shadow-xs outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/20"
-            />
-          </Field>
         </Section>
 
         <Section
