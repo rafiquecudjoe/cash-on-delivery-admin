@@ -56,7 +56,7 @@ const schema = z
     videoUrl: z.union([z.string().url(), z.literal('')]).optional(),
     hasTiers: z.boolean(),
     pricingTiers: z.array(tierSchema).max(6),
-    priceSubtext: z.string().max(80).optional(),
+    priceSubtext: z.string().max(200).optional(),
     galleryLayout: z.enum(['carousel', 'stacked']),
   })
   .refine((v) => !v.hasTiers || v.pricingTiers.length >= 1, {
@@ -262,15 +262,16 @@ export function ProductForm({ product }: Props) {
           </div>
 
           <Field
-            label="Price subtext"
-            hint="optional · max 80 chars"
+            label="Subtitle"
+            hint="optional · shown between title and price · multi-line ok"
             error={errors.priceSubtext?.message}
           >
-            <Input
+            <textarea
+              rows={2}
               {...register('priceSubtext')}
-              placeholder="e.g. per bottle · incl. delivery"
-              maxLength={80}
-              className="h-10"
+              placeholder={'e.g.\n(PROMO) — In Red colour\nBUY 1 GET 1 FREE'}
+              maxLength={200}
+              className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm leading-relaxed shadow-xs outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/20"
             />
           </Field>
         </Section>
