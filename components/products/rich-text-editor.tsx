@@ -1,9 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { useEditor, EditorContent, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
+import { TextStyle } from '@tiptap/extension-text-style';
+import { Color } from '@tiptap/extension-color';
 import {
   Bold,
   Italic,
@@ -15,10 +18,23 @@ import {
   Heading3,
   Link as LinkIcon,
   Quote,
+  Palette,
   Undo2,
   Redo2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+// Curated palette — brand-aligned plus a few common emphasis colors.
+// Admin can also pick any hex via the native color input below.
+const PRESET_COLORS = [
+  { hex: '#1A1A1A', label: 'Default' },
+  { hex: '#D97757', label: 'Accent' },
+  { hex: '#DC2626', label: 'Red' },
+  { hex: '#16A34A', label: 'Green' },
+  { hex: '#2563EB', label: 'Blue' },
+  { hex: '#9333EA', label: 'Purple' },
+  { hex: '#CA8A04', label: 'Gold' },
+];
 
 interface Props {
   value: string;
@@ -41,6 +57,8 @@ export function RichTextEditor({ value, onChange }: Props) {
         heading: { levels: [2, 3] },
       }),
       Underline,
+      TextStyle,
+      Color,
       Link.configure({
         openOnClick: false,
         autolink: true,
@@ -170,6 +188,8 @@ function Toolbar({ editor }: { editor: Editor }) {
         <LinkIcon className="size-3.5" />
       </Btn>
 
+      <ColorPickerBtn editor={editor} />
+
       <Sep />
 
       <Btn
@@ -186,6 +206,72 @@ function Toolbar({ editor }: { editor: Editor }) {
       >
         <Redo2 className="size-3.5" />
       </Btn>
+    </div>
+  );
+}
+
+/* Color picker — preset palette + native picker for arbitrary hex.
+   The current selection's color (from TextStyle/Color marks) seeds
+   the swatch outline so admin sees what's active. */
+function ColorPickerBtn({ editor }: { editor: Editor }) {
+  const [open, setOpen] = useState(false);
+  const current: string | undefined = editor.getAttributes('textStyle').color;
+  function applyColor(hex: string) {
+    if (hex.toUpperCase() === '#1A1A1A') {
+      editor.chain().focus().unsetColor().run();
+    } else {
+      editor.chain().focus().setColor(hex).run();
+    }
+    setOpen(false);
+  }
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        aria-label="Text color"
+        title="Text color"
+        onClick={() => setOpen((o) => !o)}
+        className={cn(
+          'inline-flex size-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-card hover:text-foreground',
+          open && 'bg-accent/15 text-accent',
+        )}
+      >
+        <Palette className="size-3.5" />
+        <span
+          className="absolute bottom-1 left-1 right-1 h-0.5 rounded-full"
+          style={{ background: current || 'currentColor' }}
+          aria-hidden="true"
+        />
+      </button>
+      {open && (
+        <div className="absolute left-0 top-full z-20 mt-1 flex flex-wrap items-center gap-1.5 rounded-md border border-border bg-card p-2 shadow-md">
+          {PRESET_COLORS.map((c) => (
+            <button
+              key={c.hex}
+              type="button"
+              title={c.label}
+              aria-label={c.label}
+              onClick={() => applyColor(c.hex)}
+              className={cn(
+                'size-5 rounded-full border transition-transform hover:scale-110',
+                current?.toLowerCase() === c.hex.toLowerCase()
+                  ? 'border-foreground ring-2 ring-accent ring-offset-1'
+                  : 'border-border',
+              )}
+              style={{ background: c.hex }}
+            />
+          ))}
+          <span className="mx-1 h-4 w-px bg-border-subtle" aria-hidden="true" />
+          <input
+            type="color"
+            value={current ?? '#1A1A1A'}
+            onChange={(e) => applyColor(e.target.value)}
+            className="size-5 cursor-pointer rounded-full border border-border bg-transparent p-0"
+            aria-label="Custom color"
+            title="Custom color"
+          />
+        </div>
+      )}
     </div>
   );
 }
