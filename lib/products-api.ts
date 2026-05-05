@@ -23,6 +23,7 @@ export interface AdminProduct {
   images: string[];
   videoUrl: string | null;
   pricingTiers: PricingTier[] | null;
+  priceSubtext: string | null;
   galleryLayout: GalleryLayout;
   active: boolean;
   postedById: string;
@@ -42,6 +43,7 @@ export interface CreateProductPayload {
   images: string[];
   videoUrl?: string | null;
   pricingTiers?: PricingTier[] | null;
+  priceSubtext?: string | null;
   galleryLayout?: GalleryLayout;
   active?: boolean;
 }

@@ -20,6 +20,7 @@ import {
 import { ImageUploader } from './image-uploader';
 import { VideoUploader } from './video-uploader';
 import { PricingTiersEditor } from './pricing-tiers-editor';
+import { RichTextEditor } from './rich-text-editor';
 import {
   AdminProduct,
   CreateProductPayload,
@@ -55,6 +56,7 @@ const schema = z
     videoUrl: z.union([z.string().url(), z.literal('')]).optional(),
     hasTiers: z.boolean(),
     pricingTiers: z.array(tierSchema).max(6),
+    priceSubtext: z.string().max(80).optional(),
     galleryLayout: z.enum(['carousel', 'stacked']),
   })
   .refine((v) => !v.hasTiers || v.pricingTiers.length >= 1, {
@@ -94,6 +96,7 @@ export function ProductForm({ product }: Props) {
     videoUrl: product?.videoUrl ?? '',
     hasTiers: !!product?.pricingTiers && product.pricingTiers.length > 0,
     pricingTiers: product?.pricingTiers ?? [],
+    priceSubtext: product?.priceSubtext ?? '',
     galleryLayout: product?.galleryLayout ?? 'carousel',
   };
 
@@ -134,6 +137,7 @@ export function ProductForm({ product }: Props) {
         active: values.active,
         images: values.images,
         galleryLayout: values.galleryLayout,
+        priceSubtext: values.priceSubtext?.trim() || null,
       };
       const trimmedVideo = values.videoUrl?.trim();
       if (product) {
@@ -188,13 +192,17 @@ export function ProductForm({ product }: Props) {
           <Field
             label="Description"
             error={errors.description?.message}
-            hint="Up to 5000 characters"
+            hint="Up to 5000 characters · formatting supported"
           >
-            <textarea
-              rows={4}
-              {...register('description')}
-              className="w-full rounded-md border border-input bg-card px-3 py-2.5 text-sm leading-relaxed shadow-xs outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/20"
-              placeholder="What it does, what makes it special, how it ships."
+            <Controller
+              control={control}
+              name="description"
+              render={({ field }) => (
+                <RichTextEditor
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
             />
           </Field>
 
@@ -252,6 +260,19 @@ export function ProductForm({ product }: Props) {
               />
             </Field>
           </div>
+
+          <Field
+            label="Price subtext"
+            hint="optional · max 80 chars"
+            error={errors.priceSubtext?.message}
+          >
+            <Input
+              {...register('priceSubtext')}
+              placeholder="e.g. per bottle · incl. delivery"
+              maxLength={80}
+              className="h-10"
+            />
+          </Field>
         </Section>
 
         <Section
