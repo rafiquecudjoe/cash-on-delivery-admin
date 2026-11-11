@@ -52,7 +52,12 @@ async function compressIfBig(file: File): Promise<File> {
       maxWidthOrHeight: MAX_DIMENSION,
       fileType: TARGET_TYPE,
       initialQuality: TARGET_QUALITY,
-      useWebWorker: true,
+      // The worker is a blob: that importScripts() the library from
+      // cdn.jsdelivr.net; our CSP blocks both, so it only ever logged a
+      // violation and fell back to the main thread.
+      // shortcut: main-thread compression, self-host the lib via libURL (plus
+      // worker-src blob:) if large uploads start freezing the UI.
+      useWebWorker: false,
     });
     const renamed = file.name.replace(/\.[^.]+$/, '') + '.webp';
     return new File([compressed], renamed, {
